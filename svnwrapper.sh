@@ -38,9 +38,11 @@ while true ; do
 			;;
 		local)
 			LOCALREP=true
+			continue
 			;;
 		remote)
 			LOCALREP=false
+			continue
 			;;
 	esac
 
