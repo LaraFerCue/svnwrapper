@@ -24,13 +24,27 @@ stty ${stty_origin}
 unset stty_origin
 echo
 
+LOCALREP=false
 while true ; do
     read -p "svn> " CMD URL OPTIONS
-    [ "${URL}" = "." ] && URL=""
 
-    if [ "${CMD}" = "exit" -o "${CMD}" = "quit" ] ; then
-        exit 0
-    fi
+    case "${CMD}" in
+		exit|quit)
+	        exit 0
+			;;
+		sh)
+			${URL} ${OPTIONS}
+			continue
+			;;
+		local)
+			LOCALREP=true
+			;;
+		remote)
+			LOCALREP=false
+			;;
+	esac
+
+    [ "${URL}" = "." ] && URL=""
 
     do_continue=true
     for ITEM in ${SVN_COMMANDS} ; do
@@ -45,8 +59,13 @@ while true ; do
         continue
     fi
 
-    ${SVN} --no-auth-cache --username "${USERNAME}" --password ${PASSWORD} ${CMD} \
-       ${SERVER_URL}/${URL} ${OPTIONS}
-    [ ${?} -eq 0 -a -n "${URL}" ] && SERVER_URL="${SERVER_URL}/${URL}"
+	if ${LOCALREP} ; then
+		${SVN} --no-auth-cache --username "${USERNAME}" --password "${PASSWORD}" ${CMD} \
+			${OPTIONS}
+	else
+	    ${SVN} --no-auth-cache --username "${USERNAME}" --password "${PASSWORD}" ${CMD} \
+    	   ${SERVER_URL}/${URL} ${OPTIONS}
+	    [ ${?} -eq 0 -a -n "${URL}" ] && SERVER_URL="${SERVER_URL}/${URL}"
+	fi
 done
 
