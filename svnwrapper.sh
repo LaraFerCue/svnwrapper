@@ -33,7 +33,7 @@ while true ; do
 	        exit 0
 			;;
 		sh)
-			${URL} ${OPTIONS}
+			eval ${URL} ${OPTIONS}
 			continue
 			;;
 		local)
@@ -47,6 +47,11 @@ while true ; do
 	esac
 
     [ "${URL}" = "." ] && URL=""
+
+	# Remove .. from URL
+	if echo ${URL} | grep -qF '..' ; then
+		SERVER_URL=$(echo ${SERVER_URL} | sed 's;/[^\.]*/..;;')
+	fi
 
     do_continue=true
     for ITEM in ${SVN_COMMANDS} ; do
